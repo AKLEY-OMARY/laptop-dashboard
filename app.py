@@ -9,368 +9,515 @@ HTML = """
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🖥️ Laptop Monitor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+  <title>System Monitor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --blue: #4f8eff;
+      --cyan: #00e5ff;
+      --green: #00ff9d;
+      --purple: #b44fff;
+      --orange: #ff9d00;
+      --red: #ff4f4f;
+      --dark: #060810;
+      --card: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Rajdhani', sans-serif;
-      background: #000;
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
       color: #fff;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
     /* Animated background */
-    .bg {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: radial-gradient(ellipse at top, #0a0a2e 0%, #000 60%);
-      z-index: -2;
-    }
-    .bg::before {
-      content: '';
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230066ff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      z-index: -1;
+    .bg-animate {
+      position: fixed; inset: 0; z-index: -1;
+      background: 
+        radial-gradient(ellipse 80% 50% at 20% 20%, rgba(79,142,255,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(180,79,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(0,229,255,0.04) 0%, transparent 60%),
+        #060810;
     }
 
-    /* Grid lines effect */
-    .grid-lines {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-image: 
-        linear-gradient(rgba(0,100,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,100,255,0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-      z-index: -1;
+    /* Floating particles */
+    .particles { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--blue);
+      border-radius: 50%;
+      opacity: 0;
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 30px 20px;
+    /* Grid overlay */
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: -1;
+      background-image:
+        linear-gradient(rgba(79,142,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,142,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
     }
 
-    /* Header */
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-      position: relative;
+    .container { max-width: 1300px; margin: 0 auto; padding: 40px 24px; }
+
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 50px; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(79,142,255,0.1);
+      border: 1px solid rgba(79,142,255,0.25);
+      border-radius: 100px; padding: 6px 18px;
+      font-size: 0.7em; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 20px;
     }
 
-    .header-badge {
-      display: inline-block;
-      background: rgba(0,100,255,0.1);
-      border: 1px solid rgba(0,100,255,0.3);
-      border-radius: 20px;
-      padding: 5px 15px;
-      font-size: 0.75em;
-      color: #4488ff;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 15px;
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1.5s infinite;
     }
 
     h1 {
       font-family: 'Orbitron', monospace;
-      font-size: 2.5em;
+      font-size: clamp(1.8em, 5vw, 3.5em);
       font-weight: 900;
-      background: linear-gradient(135deg, #fff 0%, #4488ff 50%, #00ffcc 100%);
+      letter-spacing: 6px;
+      background: linear-gradient(135deg, #fff 0%, var(--blue) 40%, var(--cyan) 70%, var(--green) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      text-shadow: none;
     }
 
-    .subtitle {
-      color: #4488ff;
-      font-size: 1em;
+    .tagline {
+      color: rgba(255,255,255,0.35);
+      font-size: 0.9em;
       letter-spacing: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .live-dot {
-      width: 8px; height: 8px;
-      background: #00ff88;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-      box-shadow: 0 0 10px #00ff88;
+    .live-status {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.8em; color: var(--green);
+      font-family: 'Orbitron', monospace; letter-spacing: 2px;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.7)} }
 
-    /* Cards grid */
-    .grid {
+    /* ── Top stats row ── */
+    .top-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 20px;
     }
 
-    .card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
+    .mini-card {
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 25px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.3s, border-color 0.3s;
-      backdrop-filter: blur(10px);
+      padding: 20px;
+      display: flex; align-items: center; gap: 16px;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
     }
 
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(0,100,255,0.4);
+    .mini-card::after {
+      content: ''; position: absolute;
+      inset: 0; border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent);
+      pointer-events: none;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 2px;
-      background: linear-gradient(90deg, transparent, #4488ff, transparent);
-      opacity: 0.6;
+    .mini-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(79,142,255,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 20px rgba(79,142,255,0.05);
     }
 
-    .card-icon {
-      font-size: 2em;
-      margin-bottom: 10px;
-      display: block;
+    .mini-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4em; flex-shrink: 0;
     }
 
-    .card-label {
-      font-size: 0.75em;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: #4488ff;
-      margin-bottom: 8px;
-    }
+    .icon-blue { background: rgba(79,142,255,0.15); box-shadow: 0 0 20px rgba(79,142,255,0.1); }
+    .icon-green { background: rgba(0,255,157,0.1); box-shadow: 0 0 20px rgba(0,255,157,0.08); }
+    .icon-purple { background: rgba(180,79,255,0.1); box-shadow: 0 0 20px rgba(180,79,255,0.08); }
+    .icon-orange { background: rgba(255,157,0,0.1); box-shadow: 0 0 20px rgba(255,157,0,0.08); }
 
-    .card-value {
+    .mini-info { flex: 1; min-width: 0; }
+    .mini-label { font-size: 0.7em; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+    .mini-value {
       font-family: 'Orbitron', monospace;
-      font-size: 2.8em;
-      font-weight: 700;
-      color: #fff;
+      font-size: 1.3em; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── Big gauge cards ── */
+    .gauge-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px; margin-bottom: 20px;
+    }
+
+    .gauge-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 30px;
+      position: relative; overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .gauge-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 50px rgba(0,0,0,0.4);
+    }
+
+    .gauge-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .gauge-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 25px;
+    }
+
+    .gauge-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.75em; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+    }
+
+    .gauge-title-icon { font-size: 1.4em; }
+
+    .gauge-percent {
+      font-family: 'Orbitron', monospace;
+      font-size: 3em; font-weight: 900;
       line-height: 1;
-      margin-bottom: 15px;
     }
 
-    .card-value.hostname {
-      font-size: 1.4em;
-      color: #00ffcc;
+    /* Circular gauge */
+    .circle-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 25px; position: relative;
     }
 
-    .card-value.uptime-val {
-      font-size: 1.2em;
-      color: #ffaa00;
+    .circle-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+    .circle-track { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .circle-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px; font-weight: 900; fill: #fff;
+      dominant-baseline: middle; text-anchor: middle;
     }
+    .circle-sub { font-size: 9px; fill: rgba(255,255,255,0.35); dominant-baseline: middle; text-anchor: middle; }
 
-    /* Progress bar */
-    .bar-container {
-      margin-top: 10px;
-    }
-
-    .bar-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8em;
-      color: #666;
-      margin-bottom: 6px;
-    }
-
-    .bar-bg {
-      background: rgba(255,255,255,0.05);
-      border-radius: 10px;
-      height: 6px;
-      overflow: hidden;
-    }
-
-    .bar {
-      height: 100%;
-      border-radius: 10px;
-      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Bar */
+    .bar-wrap { margin-top: 10px; }
+    .bar-labels { display: flex; justify-content: space-between; font-size: 0.75em; color: rgba(255,255,255,0.25); margin-bottom: 8px; }
+    .bar-track { background: rgba(255,255,255,0.05); border-radius: 100px; height: 8px; overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: 100px;
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
       position: relative;
     }
-
-    .bar-cpu { background: linear-gradient(90deg, #4488ff, #00ffcc); }
-    .bar-ram { background: linear-gradient(90deg, #ff4488, #ffaa00); }
-    .bar-disk { background: linear-gradient(90deg, #aa44ff, #4488ff); }
-
-    .bar::after {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 4px; height: 100%;
-      background: rgba(255,255,255,0.8);
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    .bar-fill::after {
+      content: ''; position: absolute;
+      top: 0; right: 0; bottom: 0; width: 20px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+      border-radius: 100px;
     }
 
-    /* Status bar */
-    .status-bar {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 15px 25px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+    .bar-cpu { background: linear-gradient(90deg, #4f8eff, #00e5ff); }
+    .bar-ram { background: linear-gradient(90deg, #b44fff, #ff4f9d); }
+    .bar-disk { background: linear-gradient(90deg, #ff9d00, #ff4f4f); }
+
+    /* ── Footer bar ── */
+    .footer-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px 24px;
+      display: flex; flex-wrap: wrap;
+      align-items: center; justify-content: space-between; gap: 12px;
     }
 
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85em;
-      color: #888;
+    .footer-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.78em; color: rgba(255,255,255,0.3);
     }
 
-    .status-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #00ff88;
-      box-shadow: 0 0 6px #00ff88;
-    }
+    .footer-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-blue { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
 
-    /* Glow effects */
-    .glow-blue { box-shadow: 0 0 30px rgba(68,136,255,0.1); }
-    .glow-green { box-shadow: 0 0 30px rgba(0,255,136,0.1); }
-
-    /* Warning colors */
-    .warn { color: #ffaa00 !important; }
-    .danger { color: #ff4444 !important; }
+    /* Color themes per card */
+    .cpu-card { --accent: var(--blue); }
+    .ram-card { --accent: var(--purple); }
+    .disk-card { --accent: var(--orange); }
   </style>
+
   <script>
+    // Draw particles
+    window.addEventListener('load', () => {
+      const container = document.querySelector('.particles');
+      for (let i = 0; i < 25; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `
+          left: ${Math.random()*100}%;
+          animation-duration: ${8 + Math.random()*15}s;
+          animation-delay: ${Math.random()*10}s;
+          opacity: 0;
+          background: ${['#4f8eff','#00e5ff','#00ff9d','#b44fff'][Math.floor(Math.random()*4)]};
+          width: ${1+Math.random()*2}px;
+          height: ${1+Math.random()*2}px;
+        `;
+        container.appendChild(p);
+      }
+    });
+
+    // Circle gauge helper
+    function setCircle(id, pct) {
+      const circle = document.getElementById(id);
+      if (!circle) return;
+      const r = 54;
+      const circ = 2 * Math.PI * r;
+      circle.style.strokeDasharray = circ;
+      circle.style.strokeDashoffset = circ - (pct / 100) * circ;
+    }
+
+    // Color by value
+    function colorClass(val) {
+      if (val >= 85) return '#ff4f4f';
+      if (val >= 65) return '#ff9d00';
+      return null;
+    }
+
     async function fetchStats() {
       try {
         const res = await fetch('/stats');
         const d = await res.json();
-        if (!d.cpu && d.cpu !== 0) return;
+        if (d.cpu === undefined) return;
+
+        const cpu = d.cpu, ram = d.ram, disk = d.disk;
+
+        // Mini cards
+        document.getElementById('host-val').innerText = d.hostname || '-';
+        document.getElementById('uptime-val').innerText = d.uptime || '-';
+        document.getElementById('time').innerText = new Date().toLocaleTimeString();
+        document.getElementById('footer-time').innerText = new Date().toLocaleTimeString();
 
         // CPU
-        const cpu = d.cpu;
-        document.getElementById('cpu-val').innerText = cpu + '%';
+        document.getElementById('cpu-pct').innerText = cpu + '%';
         document.getElementById('cpu-bar').style.width = cpu + '%';
-        const cpuEl = document.getElementById('cpu-val');
-        cpuEl.className = 'card-value' + (cpu > 80 ? ' danger' : cpu > 60 ? ' warn' : '');
+        setCircle('cpu-circle', cpu);
+        document.getElementById('cpu-pct').style.color = colorClass(cpu) || 'var(--cyan)';
 
         // RAM
-        const ram = d.ram;
-        document.getElementById('ram-val').innerText = ram + '%';
+        document.getElementById('ram-pct').innerText = ram + '%';
         document.getElementById('ram-bar').style.width = ram + '%';
+        setCircle('ram-circle', ram);
+        document.getElementById('ram-pct').style.color = colorClass(ram) || 'var(--purple)';
 
         // Disk
-        const disk = d.disk;
-        document.getElementById('disk-val').innerText = disk + '%';
+        document.getElementById('disk-pct').innerText = disk + '%';
         document.getElementById('disk-bar').style.width = disk + '%';
+        setCircle('disk-circle', disk);
+        document.getElementById('disk-pct').style.color = colorClass(disk) || 'var(--orange)';
 
-        // Others
-        document.getElementById('host-val').innerText = d.hostname;
-        document.getElementById('uptime-val').innerText = d.uptime;
-        document.getElementById('time').innerText = new Date().toLocaleTimeString();
-        document.getElementById('update-time').innerText = new Date().toLocaleTimeString();
       } catch(e) {}
     }
+
     setInterval(fetchStats, 2000);
     fetchStats();
   </script>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="grid-lines"></div>
+  <div class="bg-animate"></div>
+  <div class="particles"></div>
+  <div class="grid-overlay"></div>
 
   <div class="container">
+
+    <!-- Header -->
     <header>
-      <div class="header-badge">System Monitor v1.0</div>
-      <h1>LAPTOP MONITOR</h1>
-      <div class="subtitle">
-        <div class="live-dot"></div>
-        LIVE · Last updated: <span id="time">connecting...</span>
+      <div class="badge"><div class="badge-dot"></div> System Monitor</div>
+      <h1>LIVE DASHBOARD</h1>
+      <p class="tagline">Real-Time Laptop Performance Monitor</p>
+      <div class="live-status">
+        <div class="badge-dot"></div>
+        LIVE · <span id="time">connecting...</span>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- Hostname -->
-      <div class="card glow-green">
-        <span class="card-icon">💻</span>
-        <div class="card-label">Hostname</div>
-        <div class="card-value hostname" id="host-val">-</div>
-      </div>
-
-      <!-- Uptime -->
-      <div class="card">
-        <span class="card-icon">⏱️</span>
-        <div class="card-label">System Uptime</div>
-        <div class="card-value uptime-val" id="uptime-val">-</div>
-      </div>
-
-      <!-- CPU -->
-      <div class="card glow-blue">
-        <span class="card-icon">⚡</span>
-        <div class="card-label">CPU Usage</div>
-        <div class="card-value" id="cpu-val">-</div>
-        <div class="bar-container">
-          <div class="bar-info"><span>0%</span><span>100%</span></div>
-          <div class="bar-bg">
-            <div class="bar bar-cpu" id="cpu-bar" style="width:0%"></div>
-          </div>
+    <!-- Top mini cards -->
+    <div class="top-row">
+      <div class="mini-card">
+        <div class="mini-icon icon-green">💻</div>
+        <div class="mini-info">
+          <div class="mini-label">Hostname</div>
+          <div class="mini-value" id="host-val">-</div>
         </div>
       </div>
-
-      <!-- RAM -->
-      <div class="card">
-        <span class="card-icon">🧠</span>
-        <div class="card-label">RAM Usage</div>
-        <div class="card-value" id="ram-val">-</div>
-        <div class="bar-container">
-          <div class="bar-info"><span>0%</span><span>100%</span></div>
-          <div class="bar-bg">
-            <div class="bar bar-ram" id="ram-bar" style="width:0%"></div>
-          </div>
+      <div class="mini-card">
+        <div class="mini-icon icon-orange">⏱️</div>
+        <div class="mini-info">
+          <div class="mini-label">Uptime</div>
+          <div class="mini-value" id="uptime-val">-</div>
         </div>
       </div>
-
-      <!-- Disk -->
-      <div class="card">
-        <span class="card-icon">💾</span>
-        <div class="card-label">Disk Usage</div>
-        <div class="card-value" id="disk-val">-</div>
-        <div class="bar-container">
-          <div class="bar-info"><span>0%</span><span>100%</span></div>
-          <div class="bar-bg">
-            <div class="bar bar-disk" id="disk-bar" style="width:0%"></div>
-          </div>
+      <div class="mini-card">
+        <div class="mini-icon icon-blue">🌐</div>
+        <div class="mini-info">
+          <div class="mini-label">Platform</div>
+          <div class="mini-value">Linux</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon icon-purple">☁️</div>
+        <div class="mini-info">
+          <div class="mini-label">Hosted On</div>
+          <div class="mini-value">Railway</div>
         </div>
       </div>
     </div>
 
-    <!-- Status bar -->
-    <div class="status-bar">
-      <div class="status-item">
-        <div class="status-dot"></div>
+    <!-- Gauge cards -->
+    <div class="gauge-row">
+
+      <!-- CPU -->
+      <div class="gauge-card cpu-card">
+        <div class="gauge-header">
+          <div class="gauge-title">
+            <span class="gauge-title-icon">⚡</span> CPU Usage
+          </div>
+          <div class="gauge-percent" id="cpu-pct" style="color:var(--cyan)">-</div>
+        </div>
+        <div class="circle-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="circle-bg" cx="70" cy="70" r="54"/>
+            <circle class="circle-track" id="cpu-circle"
+              cx="70" cy="70" r="54"
+              stroke="url(#gradCpu)"
+              stroke-dasharray="339.3"
+              stroke-dashoffset="339.3"
+              transform="rotate(-90 70 70)"/>
+            <defs>
+              <linearGradient id="gradCpu" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#4f8eff"/>
+                <stop offset="100%" stop-color="#00e5ff"/>
+              </linearGradient>
+            </defs>
+            <text class="circle-text" x="70" y="66" id="cpu-circle-text">-</text>
+            <text class="circle-sub" x="70" y="80">PROCESSOR</text>
+          </svg>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-cpu" id="cpu-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- RAM -->
+      <div class="gauge-card ram-card">
+        <div class="gauge-header">
+          <div class="gauge-title">
+            <span class="gauge-title-icon">🧠</span> RAM Usage
+          </div>
+          <div class="gauge-percent" id="ram-pct" style="color:var(--purple)">-</div>
+        </div>
+        <div class="circle-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="circle-bg" cx="70" cy="70" r="54"/>
+            <circle class="circle-track" id="ram-circle"
+              cx="70" cy="70" r="54"
+              stroke="url(#gradRam)"
+              stroke-dasharray="339.3"
+              stroke-dashoffset="339.3"
+              transform="rotate(-90 70 70)"/>
+            <defs>
+              <linearGradient id="gradRam" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#b44fff"/>
+                <stop offset="100%" stop-color="#ff4f9d"/>
+              </linearGradient>
+            </defs>
+            <text class="circle-text" x="70" y="66">-</text>
+            <text class="circle-sub" x="70" y="80">MEMORY</text>
+          </svg>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-ram" id="ram-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Disk -->
+      <div class="gauge-card disk-card">
+        <div class="gauge-header">
+          <div class="gauge-title">
+            <span class="gauge-title-icon">💾</span> Disk Usage
+          </div>
+          <div class="gauge-percent" id="disk-pct" style="color:var(--orange)">-</div>
+        </div>
+        <div class="circle-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle class="circle-bg" cx="70" cy="70" r="54"/>
+            <circle class="circle-track" id="disk-circle"
+              cx="70" cy="70" r="54"
+              stroke="url(#gradDisk)"
+              stroke-dasharray="339.3"
+              stroke-dashoffset="339.3"
+              transform="rotate(-90 70 70)"/>
+            <defs>
+              <linearGradient id="gradDisk" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff9d00"/>
+                <stop offset="100%" stop-color="#ff4f4f"/>
+              </linearGradient>
+            </defs>
+            <text class="circle-text" x="70" y="66">-</text>
+            <text class="circle-sub" x="70" y="80">STORAGE</text>
+          </svg>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-labels"><span>0%</span><span>50%</span><span>100%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-disk" id="disk-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer bar -->
+    <div class="footer-bar">
+      <div class="footer-item">
+        <div class="footer-dot dot-green"></div>
         System Online
       </div>
-      <div class="status-item">
-        🔄 Auto-refresh every 2s
+      <div class="footer-item">
+        <div class="footer-dot dot-blue"></div>
+        Auto-refresh every 2s
       </div>
-      <div class="status-item">
-        🕐 <span id="update-time">--:--:--</span>
+      <div class="footer-item">
+        🕐 Last update: <span id="footer-time">--:--:--</span>
       </div>
-      <div class="status-item">
-        ☁️ Hosted on Railway
+      <div class="footer-item">
+        ☁️ Deployed on Railway Cloud
       </div>
     </div>
 
